@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page not found — RunStylist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --ink:#131316; --muted:#68686E; --line:rgba(19,19,22,0.09);
+    --line-strong:rgba(19,19,22,0.18); --amber:#FF8A3D; --sans:'Inter', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--sans);
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:24px;
+  }
+  .code{font-size:0.95rem; font-weight:600; color:var(--amber); margin-bottom:18px;}
+  h1{font-size:clamp(2rem,5vw,3rem); font-weight:800; letter-spacing:-0.02em; margin-bottom:16px;}
+  p{color:var(--muted); font-size:1.05rem; max-width:40ch; margin-bottom:36px;}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; font-weight:600; font-size:0.95rem;
+    padding:14px 28px; border-radius:8px; background:var(--ink); color:#fff; text-decoration:none;
+    transition:background .2s ease;
+  }
+  .btn:hover{background:#000;}
+</style>
+</head>
+<body>
+  <div class="code">404</div>
+  <h1>This page went off course.</h1>
+  <p>The page you're looking for doesn't exist, or the link is outdated. Let's get you back on track.</p>
+  <a href="/" class="btn">Back to RunStylist</a>
+</body>
+</html>
