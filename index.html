@@ -606,13 +606,39 @@
     });
   });
 
-  const form = document.getElementById('waitlist-form');
-  form.addEventListener('submit', function(e){
-    e.preventDefault();
-    document.getElementById('form-note').style.display = 'none';
-    document.getElementById('form-success').style.display = 'block';
-    form.reset();
-  });
+const form = document.getElementById('waitlist-form');
+form.addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const emailInput = document.getElementById('email-input');
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalLabel = submitBtn.textContent;
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Sending...';
+
+  const source = new URLSearchParams(window.location.search).get('utm_source') || 'direct';
+
+  try {
+    const res = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: emailInput.value, source }),
+    });
+
+    if (res.ok) {
+      document.getElementById('form-note').style.display = 'none';
+      document.getElementById('form-success').style.display = 'block';
+      form.reset();
+    } else {
+      submitBtn.textContent = 'Try again';
+      submitBtn.disabled = false;
+    }
+  } catch (err) {
+    submitBtn.textContent = 'Try again';
+    submitBtn.disabled = false;
+  }
+});
 
   function parseRefPace(str){
     const parts = str.split(':').map(Number);
