@@ -168,7 +168,15 @@
   .estimate-label{font-size:0.84rem; color:var(--muted); margin-bottom:8px;}
   .estimate-note{font-size:0.88rem; color:var(--muted); margin-top:18px; max-width:44ch;}
 
-  .calc-card{padding:32px;}
+  .session-tabs{display:flex; gap:10px; margin-top:44px; flex-wrap:wrap;}
+  .session-tabs button{
+    font-family:var(--sans); font-weight:600; font-size:0.88rem; padding:11px 18px; border-radius:100px;
+    border:1px solid var(--line-strong); background:rgba(255,255,255,0.55); backdrop-filter:blur(10px); color:var(--muted);
+    cursor:pointer; transition:all .25s ease;
+  }
+  .session-tabs button.active{background:var(--amber); color:#1a1204; border-color:var(--amber);}
+
+  .calc-card{padding:32px; margin-top:26px;}
   .calc-card h4{font-size:1rem; font-weight:600; margin-bottom:24px;}
   .field-row{display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;}
   @media (max-width:480px){ .field-row{grid-template-columns:1fr;} }
@@ -180,6 +188,18 @@
     transition:border-color .25s ease;
   }
   .field input:focus{border-color:var(--blue);}
+  .field-unit{display:flex; flex-direction:column; gap:7px;}
+  .field-unit label{font-size:0.76rem; color:var(--muted); font-weight:500;}
+  .unit-input{display:flex; border:1px solid var(--line-strong); border-radius:8px; overflow:hidden; background:rgba(255,255,255,0.6);}
+  .unit-input input{
+    flex:1; border:none; background:transparent; padding:10px 12px; font-family:var(--sans); font-weight:600;
+    font-size:1rem; color:var(--ink); outline:none; min-width:0;
+  }
+  .unit-input select{
+    border:none; border-left:1px solid var(--line-strong); background:rgba(255,255,255,0.5);
+    padding:10px 10px; font-family:var(--sans); font-weight:600; font-size:0.86rem; color:var(--muted); outline:none; cursor:pointer;
+  }
+  .unit-input:focus-within{border-color:var(--blue);}
   .calc-result{margin-top:12px; padding-top:22px; border-top:1px solid var(--line); display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px;}
   .calc-result .lbl{font-size:0.84rem; color:var(--muted);}
   .calc-result .val{font-size:2.1rem; font-weight:800; color:var(--blue);}
@@ -408,41 +428,110 @@
     <div class="wrap">
       <div class="eyebrow" style="color:var(--amber);"><span class="dot" style="background:var(--amber);"></span>More than clothes</div>
       <h2 class="reveal" style="max-width:20ch;">Understands your full workout, not just the weather.</h2>
-      <p class="lede reveal reveal-d1" style="margin-top:18px;">Describe the session the way you actually planned it, and RunStylist calculates how long it'll take based on your level — so you know if the outfit makes sense for the real duration.</p>
+      <p class="lede reveal reveal-d1" style="margin-top:18px;">Pick the type of session, fill in the structure the way you actually planned it, and RunStylist calculates how long it'll take based on your level.</p>
+
+      <div class="session-tabs reveal reveal-d1" id="session-tabs">
+        <button data-session="intervals" class="active">Intervals</button>
+        <button data-session="tempo">Tempo</button>
+        <button data-session="long">Long run</button>
+        <button data-session="easy">Easy run</button>
+        <button data-session="recovery">Recovery run</button>
+      </div>
 
       <div class="workout-wrap">
-        <div class="example-card glass reveal">
-          <div class="eyebrow" style="color:var(--muted); margin-bottom:22px;"><span class="dot" style="background:var(--muted);"></span>Today's session · Level: 10K in 44:12</div>
-          <div class="session-list">
-            <div class="session-row"><span class="k">Workout</span><span class="v">8 × 1000 m</span></div>
-            <div class="session-row"><span class="k">Warm-up</span><span class="v">5 km</span></div>
-            <div class="session-row"><span class="k">Mobility</span><span class="v">10 min</span></div>
-            <div class="session-row"><span class="k">Rest between reps</span><span class="v">2 min</span></div>
-            <div class="session-row"><span class="k">Cool-down</span><span class="v">1 km</span></div>
+        <div class="calc-card glass reveal">
+          <h4>Build your session</h4>
+
+          <div class="session-group" data-group="intervals">
+            <div class="field-row">
+              <div class="field"><label for="int-reps">Reps</label><input type="number" id="int-reps" value="8" min="1" max="40"></div>
+              <div class="field"><label for="int-dist">Distance per rep (m)</label><input type="number" id="int-dist" value="1000" min="50" step="50"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label for="int-rest">Rest between reps (min)</label><input type="number" id="int-rest" value="2" min="0" step="0.5"></div>
+              <div class="field"><label for="int-mobility">Mobility / drills (min)</label><input type="number" id="int-mobility" value="10" min="0" step="1"></div>
+            </div>
+            <div class="field-row">
+              <div class="field-unit">
+                <label for="int-warmup">Warm-up</label>
+                <div class="unit-input"><input type="number" id="int-warmup" value="5" min="0" step="0.5">
+                  <select id="int-warmup-unit"><option value="km">km</option><option value="min">min</option></select></div>
+              </div>
+              <div class="field-unit">
+                <label for="int-cooldown">Cool-down</label>
+                <div class="unit-input"><input type="number" id="int-cooldown" value="1" min="0" step="0.5">
+                  <select id="int-cooldown-unit"><option value="km">km</option><option value="min">min</option></select></div>
+              </div>
+            </div>
           </div>
-          <div class="estimate-label">Estimated total duration</div>
-          <div class="estimate-time">1h 04min</div>
-          <p class="estimate-note">Based on your level and the session structure, accounting for pace changes, rest, mobility, and the cool-down.</p>
+
+          <div class="session-group" data-group="tempo" style="display:none;">
+            <div class="field-row">
+              <div class="field-unit" style="grid-column:1/-1;">
+                <label for="tempo-val">Tempo effort</label>
+                <div class="unit-input"><input type="number" id="tempo-val" value="20" min="0" step="1">
+                  <select id="tempo-unit"><option value="min">min</option><option value="km">km</option></select></div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-unit">
+                <label for="tempo-warmup">Warm-up</label>
+                <div class="unit-input"><input type="number" id="tempo-warmup" value="3" min="0" step="0.5">
+                  <select id="tempo-warmup-unit"><option value="km">km</option><option value="min">min</option></select></div>
+              </div>
+              <div class="field-unit">
+                <label for="tempo-cooldown">Cool-down</label>
+                <div class="unit-input"><input type="number" id="tempo-cooldown" value="1" min="0" step="0.5">
+                  <select id="tempo-cooldown-unit"><option value="km">km</option><option value="min">min</option></select></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="session-group" data-group="long" style="display:none;">
+            <div class="field-row">
+              <div class="field-unit" style="grid-column:1/-1;">
+                <label for="long-val">Long run</label>
+                <div class="unit-input"><input type="number" id="long-val" value="18" min="0" step="1">
+                  <select id="long-unit"><option value="km">km</option><option value="min">min</option></select></div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label for="long-breaks">Fuel / walk breaks</label><input type="number" id="long-breaks" value="0" min="0" step="1"></div>
+              <div class="field"><label for="long-breakmin">Minutes per break</label><input type="number" id="long-breakmin" value="1" min="0" step="0.5"></div>
+            </div>
+          </div>
+
+          <div class="session-group" data-group="easy" style="display:none;">
+            <div class="field-row">
+              <div class="field-unit" style="grid-column:1/-1;">
+                <label for="easy-val">Easy run</label>
+                <div class="unit-input"><input type="number" id="easy-val" value="8" min="0" step="0.5">
+                  <select id="easy-unit"><option value="km">km</option><option value="min">min</option></select></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="session-group" data-group="recovery" style="display:none;">
+            <div class="field-row">
+              <div class="field-unit" style="grid-column:1/-1;">
+                <label for="rec-val">Recovery run</label>
+                <div class="unit-input"><input type="number" id="rec-val" value="5" min="0" step="0.5">
+                  <select id="rec-unit"><option value="km">km</option><option value="min">min</option></select></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row" style="margin-top:4px;">
+            <div class="field" style="grid-column:1/-1;"><label for="ref-level">Level — recent 10K</label><input type="text" id="ref-level" value="44:12" placeholder="mm:ss"></div>
+          </div>
         </div>
 
-        <div class="calc-card glass reveal reveal-d1">
-          <h4>Try it — estimate your own session</h4>
-          <div class="field-row">
-            <div class="field"><label for="reps">Reps</label><input type="number" id="reps" value="8" min="1" max="30"></div>
-            <div class="field"><label for="dist">Distance per rep (m)</label><input type="number" id="dist" value="1000" min="100" step="100"></div>
-          </div>
-          <div class="field-row">
-            <div class="field"><label for="rest">Rest between reps (min)</label><input type="number" id="rest" value="2" min="0" step="0.5"></div>
-            <div class="field"><label for="warmup">Warm-up (km)</label><input type="number" id="warmup" value="5" min="0" step="0.5"></div>
-          </div>
-          <div class="field-row">
-            <div class="field"><label for="cooldown">Cool-down (km)</label><input type="number" id="cooldown" value="1" min="0" step="0.5"></div>
-            <div class="field"><label for="ref">Level — recent 10K</label><input type="text" id="ref" value="44:12" placeholder="mm:ss"></div>
-          </div>
-          <div class="calc-result">
-            <span class="lbl">Estimated total duration</span>
-            <span class="val" id="calc-output">—</span>
-          </div>
+        <div class="example-card glass reveal reveal-d1">
+          <div class="eyebrow" style="color:var(--muted); margin-bottom:22px;"><span class="dot" style="background:var(--muted);"></span>Your session · Level: <span id="summary-level">10K in 44:12</span></div>
+          <div class="session-list" id="summary-list"></div>
+          <div class="estimate-label">Estimated total duration</div>
+          <div class="estimate-time" id="summary-time">—</div>
+          <p class="estimate-note">Based on your level and the session structure, accounting for pace changes, rest, mobility, and the cool-down.</p>
         </div>
       </div>
     </div>
@@ -808,10 +897,11 @@
     }
   });
 
+  // ---- Workout session builder ----
   function parseRefPace(str){
     const parts = str.split(':').map(Number);
     if(parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) return 265;
-    return (parts[0]*60 + parts[1]) / 10;
+    return (parts[0]*60 + parts[1]) / 10; // seconds per km at 10K effort
   }
   function formatDuration(totalSeconds){
     const h = Math.floor(totalSeconds/3600);
@@ -819,27 +909,92 @@
     if(h > 0) return h + 'h ' + String(m).padStart(2,'0') + 'min';
     return m + ' min';
   }
-  function calcDuration(){
-    const reps = parseFloat(document.getElementById('reps').value) || 0;
-    const distM = parseFloat(document.getElementById('dist').value) || 0;
-    const restMin = parseFloat(document.getElementById('rest').value) || 0;
-    const warmupKm = parseFloat(document.getElementById('warmup').value) || 0;
-    const cooldownKm = parseFloat(document.getElementById('cooldown').value) || 0;
-    const refPaceSec = parseRefPace(document.getElementById('ref').value);
-    const intervalPace = refPaceSec * 0.94;
-    const easyPace = refPaceSec * 1.45;
-    const repsTimeSec = reps * (distM/1000) * intervalPace;
-    const restTimeSec = Math.max(reps - 1, 0) * restMin * 60;
-    const warmupTimeSec = warmupKm * easyPace;
-    const cooldownTimeSec = cooldownKm * easyPace;
-    const mobilitySec = 10 * 60;
-    const total = repsTimeSec + restTimeSec + warmupTimeSec + cooldownTimeSec + mobilitySec;
-    document.getElementById('calc-output').textContent = formatDuration(total);
+  function val(id){ return parseFloat(document.getElementById(id).value) || 0; }
+  function unit(id){ return document.getElementById(id).value; }
+  // convert a value in km or min into seconds, given a pace in sec/km
+  function toSeconds(value, unitType, paceSecPerKm){
+    return unitType === 'km' ? value * paceSecPerKm : value * 60;
   }
-  ['reps','dist','rest','warmup','cooldown','ref'].forEach(id => {
-    document.getElementById(id).addEventListener('input', calcDuration);
+  function fmtVal(value, unitType){
+    return unitType === 'km' ? (value + ' km') : (value + ' min');
+  }
+
+  let currentSession = 'intervals';
+
+  function computeAndRender(){
+    const refPaceSec = parseRefPace(document.getElementById('ref-level').value);
+    const intervalPace = refPaceSec * 0.94;
+    const tempoPace    = refPaceSec * 1.05;
+    const easyPace      = refPaceSec * 1.45;
+    const longPace      = refPaceSec * 1.35;
+    const recoveryPace  = refPaceSec * 1.60;
+
+    let rows = [];
+    let total = 0;
+
+    if(currentSession === 'intervals'){
+      const reps = val('int-reps'), dist = val('int-dist'), rest = val('int-rest'), mobility = val('int-mobility');
+      const wu = val('int-warmup'), wuUnit = unit('int-warmup-unit');
+      const cd = val('int-cooldown'), cdUnit = unit('int-cooldown-unit');
+      total = reps*(dist/1000)*intervalPace + Math.max(reps-1,0)*rest*60
+            + toSeconds(wu, wuUnit, easyPace) + mobility*60 + toSeconds(cd, cdUnit, easyPace);
+      rows = [
+        { k:'Workout', v: reps + ' × ' + dist + ' m' },
+        { k:'Warm-up', v: fmtVal(wu, wuUnit) },
+        { k:'Mobility', v: mobility + ' min' },
+        { k:'Rest between reps', v: rest + ' min' },
+        { k:'Cool-down', v: fmtVal(cd, cdUnit) },
+      ];
+    } else if(currentSession === 'tempo'){
+      const tv = val('tempo-val'), tu = unit('tempo-unit');
+      const wu = val('tempo-warmup'), wuUnit = unit('tempo-warmup-unit');
+      const cd = val('tempo-cooldown'), cdUnit = unit('tempo-cooldown-unit');
+      total = toSeconds(tv, tu, tempoPace) + toSeconds(wu, wuUnit, easyPace) + toSeconds(cd, cdUnit, easyPace);
+      rows = [
+        { k:'Tempo effort', v: fmtVal(tv, tu) },
+        { k:'Warm-up', v: fmtVal(wu, wuUnit) },
+        { k:'Cool-down', v: fmtVal(cd, cdUnit) },
+      ];
+    } else if(currentSession === 'long'){
+      const lv = val('long-val'), lu = unit('long-unit');
+      const breaks = val('long-breaks'), breakMin = val('long-breakmin');
+      total = toSeconds(lv, lu, longPace) + breaks*breakMin*60;
+      rows = [{ k:'Long run', v: fmtVal(lv, lu) }];
+      if(breaks > 0) rows.push({ k:'Fuel / walk breaks', v: breaks + ' × ' + breakMin + ' min' });
+    } else if(currentSession === 'easy'){
+      const ev = val('easy-val'), eu = unit('easy-unit');
+      total = toSeconds(ev, eu, easyPace);
+      rows = [{ k:'Easy run', v: fmtVal(ev, eu) }];
+    } else if(currentSession === 'recovery'){
+      const rv = val('rec-val'), ru = unit('rec-unit');
+      total = toSeconds(rv, ru, recoveryPace);
+      rows = [{ k:'Recovery run', v: fmtVal(rv, ru) }];
+    }
+
+    const list = document.getElementById('summary-list');
+    list.innerHTML = rows.map(r => `<div class="session-row"><span class="k">${r.k}</span><span class="v">${r.v}</span></div>`).join('');
+    document.getElementById('summary-time').textContent = formatDuration(total);
+    document.getElementById('summary-level').textContent = '10K in ' + document.getElementById('ref-level').value;
+  }
+
+  document.querySelectorAll('#session-tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#session-tabs button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSession = btn.getAttribute('data-session');
+      document.querySelectorAll('.session-group').forEach(g => {
+        g.style.display = (g.getAttribute('data-group') === currentSession) ? 'block' : 'none';
+      });
+      computeAndRender();
+    });
   });
-  calcDuration();
+
+  document.querySelectorAll('#training input, #training select').forEach(el => {
+    el.addEventListener('input', computeAndRender);
+    el.addEventListener('change', computeAndRender);
+  });
+
+  computeAndRender();
 </script>
 
 </body>
