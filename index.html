@@ -200,6 +200,10 @@
     padding:10px 10px; font-family:var(--sans); font-weight:600; font-size:0.86rem; color:var(--muted); outline:none; cursor:pointer;
   }
   .unit-input:focus-within{border-color:var(--blue);}
+
+  .level-block{margin-top:8px; padding-top:22px; border-top:1px solid var(--line);}
+  .level-title{font-size:0.9rem; font-weight:700; margin-bottom:6px;}
+  .level-hint{font-size:0.8rem; color:var(--muted); margin-bottom:16px;}
   .calc-result{margin-top:12px; padding-top:22px; border-top:1px solid var(--line); display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px;}
   .calc-result .lbl{font-size:0.84rem; color:var(--muted);}
   .calc-result .val{font-size:2.1rem; font-weight:800; color:var(--blue);}
@@ -521,13 +525,22 @@
             </div>
           </div>
 
-          <div class="field-row" style="margin-top:4px;">
-            <div class="field" style="grid-column:1/-1;"><label for="ref-level">Level — recent 10K</label><input type="text" id="ref-level" value="44:12" placeholder="mm:ss"></div>
+          <div class="level-block">
+            <div class="level-title">Your level</div>
+            <p class="level-hint">Fill in any recent race times you have — one is enough, more is more accurate.</p>
+            <div class="field-row">
+              <div class="field"><label for="level-5k">5K</label><input type="text" id="level-5k" placeholder="mm:ss"></div>
+              <div class="field"><label for="level-10k">10K</label><input type="text" id="level-10k" value="44:12" placeholder="mm:ss"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label for="level-half">Half marathon</label><input type="text" id="level-half" placeholder="h:mm:ss"></div>
+              <div class="field"><label for="level-marathon">Marathon</label><input type="text" id="level-marathon" placeholder="h:mm:ss"></div>
+            </div>
           </div>
         </div>
 
         <div class="example-card glass reveal reveal-d1">
-          <div class="eyebrow" style="color:var(--muted); margin-bottom:22px;"><span class="dot" style="background:var(--muted);"></span>Your session · Level: <span id="summary-level">10K in 44:12</span></div>
+          <div class="eyebrow" style="color:var(--muted); margin-bottom:22px;"><span class="dot" style="background:var(--muted);"></span>Your session · <span id="summary-level">Level: default 10K pace</span></div>
           <div class="session-list" id="summary-list"></div>
           <div class="estimate-label">Estimated total duration</div>
           <div class="estimate-time" id="summary-time">—</div>
@@ -898,11 +911,44 @@
   });
 
   // ---- Workout session builder ----
-  function parseRefPace(str){
-    const parts = str.split(':').map(Number);
-    if(parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) return 265;
-    return (parts[0]*60 + parts[1]) / 10; // seconds per km at 10K effort
+  function parseTime(str){
+    if(!str) return null;
+    const parts = str.trim().split(':').map(Number);
+    if(parts.some(isNaN)) return null;
+    if(parts.length === 2) return parts[0]*60 + parts[1];       // mm:ss
+    if(parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2]; // h:mm:ss
+    return null;
   }
+  // Riegel formula: predicts an equivalent time at any distance from a known time at another distance
+  function riegelEquivalent(timeSec, fromKm, toKm){
+    return timeSec * Math.pow(toKm/fromKm, 1.06);
+  }
+  // Combines whichever race marks the person filled in (5K/10K/Half/Marathon)
+  // into a single 10K-equivalent pace (sec/km), averaging across all provided marks.
+  function computeRefPaceSecAndLabel(){
+    const marks = [
+      { id:'level-5k', km:5, label:'5K' },
+      { id:'level-10k', km:10, label:'10K' },
+      { id:'level-half', km:21.0975, label:'Half marathon' },
+      { id:'level-marathon', km:42.195, label:'Marathon' },
+    ];
+    const filled = [];
+    marks.forEach(m => {
+      const raw = document.getElementById(m.id).value;
+      const sec = parseTime(raw);
+      if(sec){ filled.push({ ...m, sec }); }
+    });
+    if(filled.length === 0){
+      return { refPaceSec: 265, label: 'Level: default 10K pace' };
+    }
+    const eq10kValues = filled.map(m => riegelEquivalent(m.sec, m.km, 10));
+    const avgEq10k = eq10kValues.reduce((a,b) => a+b, 0) / eq10kValues.length;
+    const label = filled.length === 1
+      ? ('Level: ' + filled[0].label + ' in ' + document.getElementById(filled[0].id).value)
+      : ('Level: based on ' + filled.map(f => f.label).join(' + '));
+    return { refPaceSec: avgEq10k / 10, label };
+  }
+
   function formatDuration(totalSeconds){
     const h = Math.floor(totalSeconds/3600);
     const m = Math.round((totalSeconds%3600)/60);
@@ -922,7 +968,7 @@
   let currentSession = 'intervals';
 
   function computeAndRender(){
-    const refPaceSec = parseRefPace(document.getElementById('ref-level').value);
+    const { refPaceSec, label } = computeRefPaceSecAndLabel();
     const intervalPace = refPaceSec * 0.94;
     const tempoPace    = refPaceSec * 1.05;
     const easyPace      = refPaceSec * 1.45;
@@ -974,7 +1020,7 @@
     const list = document.getElementById('summary-list');
     list.innerHTML = rows.map(r => `<div class="session-row"><span class="k">${r.k}</span><span class="v">${r.v}</span></div>`).join('');
     document.getElementById('summary-time').textContent = formatDuration(total);
-    document.getElementById('summary-level').textContent = '10K in ' + document.getElementById('ref-level').value;
+    document.getElementById('summary-level').textContent = label;
   }
 
   document.querySelectorAll('#session-tabs button').forEach(btn => {
